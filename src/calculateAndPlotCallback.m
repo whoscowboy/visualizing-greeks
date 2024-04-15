@@ -43,26 +43,65 @@ function calculateAndPlotCallback(hObject, eventdata)
         else
             disp(['Selected Option Type: ', selectedOptionType]);      % Display the option type if it's not a cell
         end
-        
+
         delta = arrayfun(@(S) mydelta(S, K, T, r, sigma, selectedOptionType), stockPrices);
         gamma = arrayfun(@(S) mygamma(S, K, T, r, sigma), stockPrices);
+
+         % Calculate rho, theta, and vega
+        rho = arrayfun(@(S) myrho(S, K, T, r, sigma, selectedOptionType), stockPrices);
+        theta = arrayfun(@(S) mytheta(S, K, T, r, sigma, selectedOptionType), stockPrices);
+        vega = arrayfun(@(S) vegaValue(S, K, T, r, sigma), stockPrices);
+
+        % Plotting all Greeks
+        figure('Name', ['Option ', num2str(i), ' Greeks Analysis'], 'NumberTitle', 'off');
+        subplot(3, 2, 1);
+        plot(stockPrices, delta, 'LineWidth', 2);
+        title('Delta');
+        xlabel('Stock Price ($)');
+        ylabel('Delta');
+
+        subplot(3, 2, 2);
+        plot(stockPrices, gamma, 'LineWidth', 2);
+        title('Gamma');
+        xlabel('Stock Price ($)');
+        ylabel('Gamma');
+
+        subplot(3, 2, 3);
+        plot(stockPrices, rho, 'LineWidth', 2);
+        title('Rho');
+        xlabel('Stock Price ($)');
+        ylabel('Rho');
+
+        subplot(3, 2, 4);
+        plot(stockPrices, theta, 'LineWidth', 2);
+        title('Theta');
+        xlabel('Stock Price ($)');
+        ylabel('Theta per Day');
+
+        subplot(3, 2, 5);
+        plot(stockPrices, vega, 'LineWidth', 2);
+        title('Vega');
+        xlabel('Stock Price ($)');
+        ylabel('Vega per 1% Volatility');
+
+        grid on;
 
         % Calculate Payoffs for both call and put
         [callPayoff, putPayoff] = optionPayoffs(stockPrices, K);
 
-        % Plot Greeks
-        figure('Name', ['Option ', num2str(i), ' Greeks Analysis'], 'NumberTitle', 'off');
-        subplot(2,1,1);
-        plot(stockPrices, delta, 'LineWidth', 2);
-        title(['Delta for Option ', num2str(i), ' (', selectedOptionType, ')']);
-        xlabel('Stock Price ($)');
-        ylabel('Delta');
-        subplot(2,1,2);
-        plot(stockPrices, gamma, 'LineWidth', 2);
-        title(['Gamma for Option ', num2str(i)]);
-        xlabel('Stock Price ($)');
-        ylabel('Gamma');
-        grid on;
+        % % Plot Greeks
+        % figure('Name', ['Option ', num2str(i), ' Greeks Analysis'], 'NumberTitle', 'off');
+        % subplot(2,1,1);
+        % plot(stockPrices, delta, 'LineWidth', 2);
+        % title(['Delta for Option ', num2str(i), ' (', selectedOptionType, ')']);
+        % xlabel('Stock Price ($)');
+        % ylabel('Delta');
+        % subplot(2,1,2);
+        % plot(stockPrices, gamma, 'LineWidth', 2);
+        % title(['Gamma for Option ', num2str(i)]);
+        % xlabel('Stock Price ($)');
+        % ylabel('Gamma');
+        % grid on;
 
         % Plot only the relevant payoff based on the selected option type
         figure('Name', ['Option ', num2str(i), ' Payoff'], 'NumberTitle', 'off');
