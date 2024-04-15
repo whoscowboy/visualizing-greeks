@@ -40,6 +40,25 @@ function runMonteCarloSimulation_Callback(hNumSims, hTimeHorizon)
     
     % Now, you can use dt to perform the Monte Carlo simulation
     pricePaths = S0 * exp(cumsum((r - 0.5 * sigma^2) * dt + sigma * sqrt(dt) * randn(numSteps, numSims), 1));
+
+
+    % Time steps of interest
+    timeSteps = [30, 60, 120, 252];
+    for t = timeSteps
+        if t <= numSteps % Check if the time step is within the simulation range
+            % Store prices in a struct with dynamic field names
+            stockPricesAtTimeSteps.(['TimeStep_' num2str(t)]) = pricePaths(t, :);
+        else
+            fprintf('Time step %d is beyond the simulation range.\n', t);
+        end
+    end
+    
+    % Assign the structure to a base workspace variable
+    assignin('base', 'StockPricesAtSelectedTimeSteps', stockPricesAtTimeSteps);
+
+
+
+
     
     % Precompute Delta for all paths and all time steps
     DeltaMatrix = nan(numSteps, numSims);
@@ -63,7 +82,7 @@ function runMonteCarloSimulation_Callback(hNumSims, hTimeHorizon)
         drawnow; % Force MATLAB to render the plot immediately
     
         % Pause for a brief moment to create animation effect (adjust pause time as needed)
-        pause(0.05);
+        pause(0.005);
     end
 
     % After dynamic plotting, create the summary surface plot
@@ -74,5 +93,19 @@ function runMonteCarloSimulation_Callback(hNumSims, hTimeHorizon)
     ylabel('Time (Years)');
     zlabel('Delta');
     colorbar;
+
+    % Calculate the number of times the option ends in-the-money
+    finalPrices = pricePaths(end, :);  % Extract the final day stock prices from each simulation path
+    if strcmp(optionType, 'Call')
+        itmCount = sum(finalPrices > K);  % Count how many final prices are greater than the strike price for calls
+    elseif strcmp(optionType, 'Put')
+        itmCount = sum(finalPrices < K);  % Count how many final prices are below the strike price for puts
+    else
+        disp('Option type is not recognized. Cannot calculate in-the-money occurrences.');
+        return;
+    end
+
+    % Print the count to the MATLAB console
+    fprintf('Number of times the option ended in-the-money: %d out of %d simulations\n', itmCount, numSims);
 end
 

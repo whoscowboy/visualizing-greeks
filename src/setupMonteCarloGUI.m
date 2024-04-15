@@ -19,6 +19,12 @@ function setupMonteCarloGUI
     % Button to start the simulation
     uicontrol('Style', 'pushbutton', 'Parent', figMC, 'Position', [50, startYPos - 5*gapY, width, height], 'String', 'Run Simulation', ...
         'Callback', @(src, evt) runMonteCarloSimulation_Callback(hNumSims, hTimeHorizon));
+
+    newButtonHeight = startYPos - 10 * gapY;  % Adjust the multiplier to find a clear space
+
+    % Create the button for the mean-reverting simulation
+    uicontrol('Style', 'pushbutton', 'Parent', figMC, 'Position', [50, newButtonHeight, width, height], 'String', 'Run Mean-Reverting Simulation', 'Callback', @(src, evt) runMeanRevertingMCS_Callback(hNumSims, hTimeHorizon));
+
 end
 
 
