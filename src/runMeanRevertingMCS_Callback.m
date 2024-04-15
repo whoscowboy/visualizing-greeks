@@ -32,10 +32,19 @@ function runMeanRevertingMCS_Callback(hNumSims, hTimeHorizon)
     end
     
     % Parameters for mean-reversion model
-    %theta = 0.15;  % Speed of mean reversion
-    theta = 0.05;
-    %mu = S0;       % Long-term mean, setting it dynamically based on user input
-    mu = S0 * 1.03;
+    %in the money 61.8% of the time. so = 100 x = 102 vol 0.2
+    theta = 0.23;
+    mu = S0 * 1.1;
+
+
+    %in the money 28% of the time. so = 100 x = 102
+    % theta = 0.1;  % Speed of mean reversion
+    % mu = S0 * 1.2;       % Long-term mean, setting it dynamically based on user input
+
+
+    % in the money
+    % theta = 0.4;
+    % mu = S0 * 1.1;
     % Adjust the time horizon if the user inputs a longer time to maturity than the specified horizon
     dt = 1/252; % Daily time step, assuming 252 trading days in a year
     numSteps = max(timeHorizon, T) * 252; % Convert time horizon to trading days
@@ -74,13 +83,24 @@ function runMeanRevertingMCS_Callback(hNumSims, hTimeHorizon)
     end
 
     % After dynamic plotting, create the summary surface plot
+
+    timeInYears = (0:numSteps-1) * dt;
+
+    % After dynamic plotting, create the summary surface plot
     figure;
-    surf(1:numSims, (1:numSteps) * dt * 252, DeltaMatrix);
+    surf(1:numSims, timeInYears, DeltaMatrix);
     title('Delta Evolution Over Time Across All Simulated Paths');
     xlabel('Simulation Paths');
     ylabel('Time (Years)');
     zlabel('Delta');
     colorbar;
+    % figure;
+    % surf(1:numSims, (1:numSteps) * dt * 252, DeltaMatrix);
+    % title('Delta Evolution Over Time Across All Simulated Paths');
+    % xlabel('Simulation Paths');
+    % ylabel('Time (Years)');
+    % zlabel('Delta');
+    % colorbar;
 
     % Calculate the number of times the option ends in-the-money
     finalPrices = pricePaths(end, :);

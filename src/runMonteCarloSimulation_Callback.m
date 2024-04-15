@@ -86,13 +86,23 @@ function runMonteCarloSimulation_Callback(hNumSims, hTimeHorizon)
     end
 
     % After dynamic plotting, create the summary surface plot
+    timeInYears = (0:numSteps-1) * dt;
+
+    % After dynamic plotting, create the summary surface plot
     figure;
-    surf(1:numSims, (1:numSteps) * dt * 252, DeltaMatrix);
+    surf(1:numSims, timeInYears, DeltaMatrix);
     title('Delta Evolution Over Time Across All Simulated Paths');
     xlabel('Simulation Paths');
     ylabel('Time (Years)');
     zlabel('Delta');
     colorbar;
+    % figure;
+    % surf(1:numSims, (1:numSteps) * dt * 252, DeltaMatrix);
+    % title('Delta Evolution Over Time Across All Simulated Paths');
+    % xlabel('Simulation Paths');
+    % ylabel('Time (Years)');
+    % zlabel('Delta');
+    % colorbar;
 
     % Calculate the number of times the option ends in-the-money
     finalPrices = pricePaths(end, :);  % Extract the final day stock prices from each simulation path
