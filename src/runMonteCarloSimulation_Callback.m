@@ -9,16 +9,36 @@ function runMonteCarloSimulation_Callback(hNumSims, hTimeHorizon)
         return;
     end
     
-    % Fetch other necessary option parameters from the main GUI or set defaults
-    S0 = 100; % Current stock price (example default)
-    K = 100;  % Strike price (example default)
-    r = 0.05; % Risk-free rate (example default)
-    sigma = 0.2; % Volatility (example default)
-    optionType = 'Call'; % Option type (example default)
+    % Fetch the user's inputs for Option 1
+    S0 = str2double(get(findobj('Tag', 'Option1StockPrice'), 'String'));    % Current stock price
+    K = str2double(get(findobj('Tag', 'Option1StrikePrice'), 'String'));    % Strike price
+    T = str2double(get(findobj('Tag', 'Option1TimeToMaturity'), 'String')); % Time to maturity
+    r = str2double(get(findobj('Tag', 'Option1RiskFreeRate'), 'String'));   % Risk-free rate
+    sigma = str2double(get(findobj('Tag', 'Option1Volatility'), 'String')); % Volatility
+    optionTypeHandle = findobj('Tag', 'Option1Type');
+    optionTypeValue = get(optionTypeHandle, 'Value');
+    optionTypeStr = get(optionTypeHandle, 'String');
+    
+    % Check if optionTypeValue is wrapped in a cell and extract the number if it is
+    if iscell(optionTypeValue)
+        optionTypeValue = optionTypeValue{1};
+    end
+    
+    % Now we can safely use optionTypeValue to index into optionTypeStr
+    optionType = optionTypeStr{optionTypeValue};
+
+    % Validate the fetched option inputs
+    if any(isnan([S0, K, T, r, sigma]) | T <= 0)
+        errordlg('Please ensure all Option 1 fields are filled out correctly and are positive numeric values.', 'Input Error');
+        return;
+    end
+    
+    % Adjust the time horizon if the user inputs a longer time to maturity than the specified horizon
+    timeHorizon = max(timeHorizon, T);
     dt = 1/252; % Daily time step, assuming 252 trading days in a year
     numSteps = timeHorizon * 252; % Convert time horizon to trading days
     
-    % Perform the Monte Carlo simulation for stock prices
+    % Now, you can use dt to perform the Monte Carlo simulation
     pricePaths = S0 * exp(cumsum((r - 0.5 * sigma^2) * dt + sigma * sqrt(dt) * randn(numSteps, numSims), 1));
     
     % Precompute Delta for all paths and all time steps
