@@ -32,6 +32,19 @@ function calculateAndPlotCallback(hObject, eventdata)
         % Calculate Greeks based on the selected type
         delta = arrayfun(@(S) mydelta(S, K, T, r, sigma, selectedOptionType), stockPrices);
         gamma = arrayfun(@(S) mygamma(S, K, T, r, sigma), stockPrices); % Gamma doesn't change with option type
+
+        % Calculate and Plot Payoffs
+        [callPayoff, putPayoff] = optionPayoffs(stockPrices, K, selectedOptionType);
+        
+        % New plotting section for payoffs
+        figure('Name', ['Option ', num2str(i), ' Payoff Diagram'], 'NumberTitle', 'off');
+        plot(stockPrices, callPayoff, 'b-', 'LineWidth', 2); hold on;
+        plot(stockPrices, putPayoff, 'r-', 'LineWidth', 2);
+        title(['Payoff for Option ', num2str(i)]);
+        xlabel('Stock Price ($)');
+        ylabel('Payoff ($)');
+        legend('Call Payoff', 'Put Payoff');
+        grid on;
         
         % Plotting the results
         figure('Name', ['Option ', num2str(i), ' Greeks Analysis'], 'NumberTitle', 'off');
