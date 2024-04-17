@@ -33,13 +33,13 @@ function runMeanRevertingMCS_Callback(hNumSims, hTimeHorizon)
     
     % Parameters for mean-reversion model
     %in the money 61.8% of the time. so = 100 x = 102 vol 0.2
-    theta = 0.23;
-    mu = S0 * 1.1;
+    % theta = 0.23;
+    % mu = S0 * 1.1;
 
 
     %in the money 28% of the time. so = 100 x = 102
-    % theta = 0.1;  % Speed of mean reversion
-    % mu = S0 * 1.2;       % Long-term mean, setting it dynamically based on user input
+    theta = 0.1;  % Speed of mean reversion
+    mu = S0 * 1.2;       % Long-term mean, setting it dynamically based on user input
 
 
     % in the money
