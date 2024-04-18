@@ -33,33 +33,8 @@ function setupMultiGreeksSurf
     [S, T] = meshgrid(stockPrices, timeToMaturity);
 
     % Create separate figures for each Greek with initial empty surf plots
-    figDelta = figure('Name', 'Delta Surface', 'NumberTitle', 'off');
-    axDelta = axes('Parent', figDelta);
-    surfDelta = surf(axDelta, S, T, zeros(size(S)), 'EdgeColor', 'none');
-    title('Delta');
-    xlabel('Stock Price ($)');
-    ylabel('Time to Maturity (years)');
-    zlabel('Delta');
-    colormap(figDelta, 'winter');
-
-    figGamma = figure('Name', 'Gamma Surface', 'NumberTitle', 'off');
-    axGamma = axes('Parent', figGamma);
-    surfGamma = surf(axGamma, S, T, zeros(size(S)), 'EdgeColor', 'none');
-    title('Gamma');
-    xlabel('Stock Price ($)');
-    ylabel('Time to Maturity (years)');
-    zlabel('Gamma');
-    colormap(figGamma, 'autumn');
-
-    figTheta = figure('Name', 'Theta Surface', 'NumberTitle', 'off');
-    axTheta = axes('Parent', figTheta);
-    surfTheta = surf(axTheta, S, T, zeros(size(S)), 'EdgeColor', 'none');
-    title('Theta');
-    xlabel('Stock Price ($)');
-    ylabel('Time to Maturity (years)');
-    zlabel('Theta');
-    colormap(figTheta, 'cool');
-
+    setupGreekPlots(S, T);
+    
     % Define the update function
     function updateGreeksPlots(~, ~)
         % Retrieve all parameter values from sliders and the option type
@@ -74,11 +49,38 @@ function setupMultiGreeksSurf
         selectedOptionType = selectedOptionType{get(optionTypeDropdown, 'Value')};
 
         % Update the surf plot data
-        set(surfDelta, 'ZData', arrayfun(@(s, t) mydelta(s, params.StrikePrice, t, params.RiskFreeRate, params.Volatility, selectedOptionType), S, T));
-        set(surfGamma, 'ZData', arrayfun(@(s, t) mygamma(s, params.StrikePrice, t, params.RiskFreeRate, params.Volatility), S, T));
-        set(surfTheta, 'ZData', arrayfun(@(s, t) mytheta(s, params.StrikePrice, t, params.RiskFreeRate, params.Volatility, selectedOptionType), S, T));
+        updateGreekSurfData(S, T, params, selectedOptionType);
     end
 
-    % Initial update to populate plots
+    % Call to update plots initially
     updateGreeksPlots();
+end
+
+function setupGreekPlots(S, T)
+    % Setup Delta, Gamma, Theta, and Vega plots
+    global surfDelta surfGamma surfTheta surfVega;
+    figNames = {'Delta', 'Gamma', 'Theta', 'Vega'};
+    colormaps = {'winter', 'autumn', 'cool', 'hot'};
+    global figDelta figGamma figTheta figVega;
+    greekAxes = {figDelta, figGamma, figTheta, figVega};
+    
+    for i = 1:length(figNames)
+        greekFig = figure('Name', [figNames{i} ' Surface'], 'NumberTitle', 'off');
+        greekAxes{i} = axes('Parent', greekFig);
+        eval(['surf' figNames{i} ' = surf(greekAxes{i}, S, T, zeros(size(S)), ''EdgeColor'', ''none'');']);
+        title([figNames{i}]);
+        xlabel('Stock Price ($)');
+        ylabel('Time to Maturity (years)');
+        zlabel(figNames{i});
+        colormap(greekAxes{i}, colormaps{i});
+    end
+end
+
+function updateGreekSurfData(S, T, params, selectedOptionType)
+    % Assuming vegaValue and other Greek functions exist and calculate the respective values
+    global surfDelta surfGamma surfTheta surfVega;
+    set(surfDelta, 'ZData', arrayfun(@(s, t) mydelta(s, params.StrikePrice, t, params.RiskFreeRate, params.Volatility, selectedOptionType), S, T));
+    set(surfGamma, 'ZData', arrayfun(@(s, t) mygamma(s, params.StrikePrice, t, params.RiskFreeRate, params.Volatility), S, T));
+    set(surfTheta, 'ZData', arrayfun(@(s, t) mytheta(s, params.StrikePrice, t, params.RiskFreeRate, params.Volatility, selectedOptionType), S, T));
+    set(surfVega, 'ZData', arrayfun(@(s, t) vegaValue(s, params.StrikePrice, t, params.RiskFreeRate, params.Volatility), S, T));
 end
