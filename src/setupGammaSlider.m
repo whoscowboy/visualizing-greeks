@@ -1,6 +1,6 @@
 function setupGammaSlider
     % Set up the GUI for Gamma visualization
-    fig = figure('Name', 'Gamma Visualization', 'Position', [100, 100, 500, 400], 'NumberTitle', 'off', 'MenuBar', 'none');
+    fig = figure('Name', 'Gamma Visualization', 'Position', [100, 100, 600, 400], 'NumberTitle', 'off', 'MenuBar', 'none');
 
     % Define parameters and their default values
     params = struct('StockPrice', 100, 'StrikePrice', 100, 'TimeToMaturity', 1, ...
@@ -13,14 +13,17 @@ function setupGammaSlider
                     'TimeToMaturity', [0.1, 3], 'RiskFreeRate', [0.01, 0.1], ...
                     'Volatility', [0.1, 0.5]);
 
-    % Setup sliders and labels
+    % Setup sliders, labels, and value displays
     for i = 1:numParams
         paramName = paramNames{i};
         uicontrol('Style', 'text', 'Parent', fig, 'Position', [10, 380 - i*30, 120, 20], ...
                   'String', paramName, 'HorizontalAlignment', 'left');
-        uicontrol('Style', 'slider', 'Parent', fig, 'Position', [130, 380 - i*30, 240, 20], ...
+        slider = uicontrol('Style', 'slider', 'Parent', fig, 'Position', [130, 380 - i*30, 240, 20], ...
                   'Min', limits.(paramName)(1), 'Max', limits.(paramName)(2), 'Value', params.(paramName), ...
                   'Tag', paramName, 'Callback', @updateGammaPlot);
+        % Display for current value next to each slider
+        uicontrol('Style', 'text', 'Parent', fig, 'Position', [380, 380 - i*30, 50, 20], ...
+                  'String', num2str(get(slider, 'Value'), '%.2f'), 'Tag', [paramName 'Value'], 'HorizontalAlignment', 'left');
     end
 
     % Dropdown for option type
@@ -30,7 +33,7 @@ function setupGammaSlider
     % Axes for plotting Gamma
     ax = axes('Parent', fig, 'Position', [0.3, 0.2, 0.65, 0.5]);
     title(ax, 'Gamma Plot');
-    xlabel(ax, 'Stock Price');
+    xlabel(ax, 'Stock Price ($)');
     ylabel(ax, 'Gamma');
 
     % Initial plot
@@ -40,7 +43,11 @@ function setupGammaSlider
         % Retrieve all parameter values from sliders and dropdown
         for j = 1:numParams
             paramName = paramNames{j};
-            params.(paramName) = get(findobj('Tag', paramName), 'Value');
+            sliderValue = get(findobj('Tag', paramName), 'Value');
+            params.(paramName) = sliderValue;
+            % Update the display for the current value
+            valueDisplay = findobj('Tag', [paramName 'Value']);
+            set(valueDisplay, 'String', num2str(sliderValue, '%.2f'));
         end
         
         % Get the dropdown menu and retrieve the value
@@ -61,8 +68,22 @@ function setupGammaSlider
                         params.RiskFreeRate, params.Volatility), stockPrices);
         
         plot(ax, stockPrices, gammas, 'b-', 'LineWidth', 2);
+        xlabel(ax, 'Stock Price ($)'); % Set x-axis label
+        ylabel(ax, 'Gamma'); % Set y-axis label
         grid on;
         legend(ax, ['Gamma for ', optionType, ' Option'], 'Location', 'best');
-    end
 
+        % Display the formula for Gamma at the top of the plot
+        % Display the formula for Gamma at the top of the plot
+        formula = '$$\Gamma = \frac{{\phi(d_1)}}{{S \sigma \sqrt{T}}}$$'; % Corrected LaTeX string
+        text('Parent', ax, 'String', formula, 'Units', 'normalized', 'Position', [0.5, 0.95], ...
+             'HorizontalAlignment', 'center', 'FontSize', 12, 'FontWeight', 'bold', 'Interpreter', 'latex', 'BackgroundColor', 'white');
+
+    end
 end
+
+% function gamma = mygamma(S, K, T, r, sigma)
+%     % Your existing Gamma calculation function
+%     d1 = (log(S/K) + (r + 0.5*sigma^2)*T) / (sigma*sqrt(T));
+%     gamma = normpdf(d1) / (S * sigma * sqrt(T));
+% end
