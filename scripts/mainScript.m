@@ -6,7 +6,8 @@ inputLabels = {'StockPrice', 'StrikePrice', 'TimeToMaturity', 'RiskFreeRate', 'V
 numOptions = 2; % Update to use 2 options
 
 % Call the function to set up the GUI
-setupOptionGUI;
+%setupOptionGUI;
+setupGammaSlider;
 
 
 % Define global variables for input fields and the number of options
