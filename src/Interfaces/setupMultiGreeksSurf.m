@@ -3,12 +3,12 @@ function setupMultiGreeksSurf
     fig = figure('Name', 'Multi-Greeks Visualization Control Panel', 'Position', [100, 100, 500, 300], 'NumberTitle', 'off', 'MenuBar', 'none');
 
     % Define parameters and their default values
-    params = struct('StrikePrice', 100, 'RiskFreeRate', 0.05, 'Volatility', 0.20);
+    params = struct('StrikePrice', 100, 'RiskFreeRate', 0.05, 'Volatility', 0.20, 'TimeToMaturity', 1);
     paramNames = fieldnames(params);
     numParams = numel(paramNames);
 
     % Define limits for sliders
-    limits = struct('StrikePrice', [50, 150], 'RiskFreeRate', [0.01, 0.1], 'Volatility', [0.1, 0.5]);
+    limits = struct('StrikePrice', [50, 150], 'RiskFreeRate', [0.01, 0.1], 'Volatility', [0.1, 0.5], 'TimeToMaturity', [0.1, 2]);
 
     % Setup sliders, labels, and value displays
     baseY = 250; % Starting vertical position for sliders
@@ -27,10 +27,9 @@ function setupMultiGreeksSurf
     optionTypeDropdown = uicontrol('Style', 'popupmenu', 'Parent', fig, 'Position', [10, baseY - (numParams+1)*30, 100, 20], ...
                                    'String', {'Call', 'Put'}, 'Tag', 'optionTypeDropdown', 'Callback', @updateGreeksPlots);
 
-    % Initial range of stock prices and time to maturity
+    % Initial range of stock prices and set up for T using params.TimeToMaturity
     stockPrices = linspace(50, 150, 100);
-    timeToMaturity = linspace(0.1, 2, 100);
-    [S, T] = meshgrid(stockPrices, timeToMaturity);
+    [S, T] = meshgrid(stockPrices, linspace(limits.TimeToMaturity(1), limits.TimeToMaturity(2), 100));
 
     % Create separate figures for each Greek with initial empty surf plots
     setupGreekPlots(S, T);
@@ -47,6 +46,10 @@ function setupMultiGreeksSurf
         end
         selectedOptionType = get(optionTypeDropdown, 'String');
         selectedOptionType = selectedOptionType{get(optionTypeDropdown, 'Value')};
+
+        % Recompute T to reflect changes in TimeToMaturity
+        T = linspace(limits.TimeToMaturity(1), params.TimeToMaturity, 100);
+        [S, T] = meshgrid(stockPrices, T);
 
         % Update the surf plot data
         updateGreekSurfData(S, T, params, selectedOptionType);
@@ -77,7 +80,7 @@ function setupGreekPlots(S, T)
 end
 
 function updateGreekSurfData(S, T, params, selectedOptionType)
-    % Assuming vegaValue and other Greek functions exist and calculate the respective values
+    % Assuming delta, gamma, theta, vegaValue and other Greek functions exist and calculate the respective values
     global surfDelta surfGamma surfTheta surfVega;
     set(surfDelta, 'ZData', arrayfun(@(s, t) mydelta(s, params.StrikePrice, t, params.RiskFreeRate, params.Volatility, selectedOptionType), S, T));
     set(surfGamma, 'ZData', arrayfun(@(s, t) mygamma(s, params.StrikePrice, t, params.RiskFreeRate, params.Volatility), S, T));
