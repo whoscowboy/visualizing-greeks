@@ -4,7 +4,6 @@ function delta = mydelta(S, K, T, r, sigma, optionType)
     
     %Black-Scholes
     %callPrice = S * normcdf(d1) - K * exp(-r * T) * normcdf(d2);
-    
     % Calculates the Delta of an option
     % Check optionType using a case-insensitive comparison
     if strcmpi(optionType, 'Call')

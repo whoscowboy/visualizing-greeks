@@ -38,13 +38,13 @@ function runMeanRevertingMCS_Callback(hNumSims, hTimeHorizon)
 
 
     %in the money 28% of the time. so = 100 x = 102
-    theta = 0.1;  % Speed of mean reversion
-    mu = S0 * 1.2;       % Long-term mean, setting it dynamically based on user input
+    % theta = 0.1;  % Speed of mean reversion
+    % mu = S0 * 1.2;       % Long-term mean, setting it dynamically based on user input
 
 
     % in the money
-    % theta = 0.4;
-    % mu = S0 * 1.1;
+    theta = 0.4;
+    mu = S0 * 1.3;
     % Adjust the time horizon if the user inputs a longer time to maturity than the specified horizon
     dt = 1/252; % Daily time step, assuming 252 trading days in a year
     numSteps = max(timeHorizon, T) * 252; % Convert time horizon to trading days
@@ -56,6 +56,7 @@ function runMeanRevertingMCS_Callback(hNumSims, hTimeHorizon)
     % Perform the Monte Carlo simulation with mean-reversion
     for t = 2:numSteps
         dW = randn(1, numSims);  % Standard normal innovations
+        %Ornstein-Uhlenbech Process
         pricePaths(t, :) = pricePaths(t-1, :) + theta * (mu - pricePaths(t-1, :)) * dt + sigma * sqrt(dt) * dW;
     end
 
